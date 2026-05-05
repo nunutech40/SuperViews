@@ -22,6 +22,36 @@ Ini adalah mesin rahasia Flutter yang ditulis menggunakan bahasa C++ agar berjal
 *   **Dart VM (Virtual Machine):** Mesin yang menjalankan kode Dart. Di mode *Debug*, dia menggunakan JIT (*Just-In-Time*) agar *Hot Reload* bisa berjalan. Di mode *Release*, kode dikompilasi menjadi AOT (*Ahead-Of-Time* / *Machine Code* murni) sehingga sangat cepat.
 *   **Text Shaping (HarfBuzz) & Layout:** Engine yang bertugas menghitung jarak antar huruf (*kerning*), huruf Arab (RTL), dan emoji.
 
+### Flowchart Interaksi Hardware & Mesin Flutter
+
+```mermaid
+graph TD
+    %% Hardware Level
+    subgraph Hardware ["Hardware Level"]
+        VSync["VSync<br>(Detak 16ms)"]
+        CPU["CPU<br>(Hitung Logika)"]
+        GPU["GPU<br>(Warnai Pixel)"]
+    end
+
+    %% Flutter Engine Level
+    subgraph Engine ["Flutter Engine (C++)"]
+        DartVM["Dart VM<br>(Jalankan Kode)"]
+        Impeller["Impeller/Skia<br>(Mesin Lukis)"]
+    end
+
+    %% Framework Level
+    subgraph Framework ["Flutter Framework (Dart)"]
+        UI["Kode UI<br>(Widget/State)"]
+    end
+
+    %% Interaksi
+    VSync -- "Aba-aba Rebuild" --> UI
+    UI -- "Dieksekusi oleh" --> CPU
+    CPU -- "Berjalan di atas" --> DartVM
+    DartVM -- "Kirim Data Gambar" --> Impeller
+    Impeller -- "Kirim Pixel" --> GPU
+```
+
 ---
 
 ## 3. Flutter Framework (Dart) - Arsitek UI
