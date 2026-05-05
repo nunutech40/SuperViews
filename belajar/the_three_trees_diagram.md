@@ -24,33 +24,33 @@ graph TD
     classDef render fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
 
     %% --- WIDGET TREE ---
-    subgraph WIDGET TREE (Kertas Blueprint / Sementara)
-        W1[Padding Widget<br>padding: 8.0]:::widget --> W2[ColoredBox Widget<br>color: red]:::widget
-        W2 --> W3[Text Widget<br>data: 'Halo']:::widget
+    subgraph WIDGET_TREE [Kertas Blueprint / Sementara]
+        W1["Padding Widget<br>padding: 8.0"]:::widget --> W2["ColoredBox Widget<br>color: red"]:::widget
+        W2 --> W3["Text Widget<br>data: 'Halo'"]:::widget
     end
 
     %% --- ELEMENT TREE ---
-    subgraph ELEMENT TREE (Mandor / Memegang ID / Permanen)
-        E1[PaddingElement<br>ID Memori: 0x1A<br>Status: Clean]:::element --> E2[ColoredBoxElement<br>ID Memori: 0x2B<br>Status: Clean]:::element
-        E2 --> E3[TextElement<br>ID Memori: 0x3C<br>Status: Clean]:::element
+    subgraph ELEMENT_TREE [Mandor / Memegang ID / Permanen]
+        E1["PaddingElement<br>ID Memori: 0x1A<br>Status: Clean"]:::element --> E2["ColoredBoxElement<br>ID Memori: 0x2B<br>Status: Clean"]:::element
+        E2 --> E3["TextElement<br>ID Memori: 0x3C<br>Status: Clean"]:::element
     end
 
     %% --- RENDER OBJECT TREE ---
-    subgraph RENDEROBJECT TREE (Bangunan Fisik / Berat / GPU)
-        R1[RenderPadding<br>Size: 116x116<br>Margin: 8px]:::render --> R2[RenderColoredBox<br>Size: 100x100<br>Paint: Red]:::render
-        R2 --> R3[RenderParagraph<br>Size: 100x100<br>Glyphs: 'H-a-l-o']:::render
+    subgraph RENDEROBJECT_TREE [Bangunan Fisik / Berat / GPU]
+        R1["RenderPadding<br>Size: 116x116<br>Margin: 8px"]:::render --> R2["RenderColoredBox<br>Size: 100x100<br>Paint: Red"]:::render
+        R2 --> R3["RenderParagraph<br>Size: 100x100<br>Glyphs: 'H-a-l-o'"]:::render
     end
 
     %% --- HUBUNGAN (MAPPING) ---
     %% Widget dibaca oleh Element
-    W1 -.->|Dibaca oleh| E1
-    W2 -.->|Dibaca oleh| E2
-    W3 -.->|Dibaca oleh| E3
+    W1 -.->|"Dibaca oleh"| E1
+    W2 -.->|"Dibaca oleh"| E2
+    W3 -.->|"Dibaca oleh"| E3
 
     %% Element mengendalikan RenderObject
-    E1 ===>|Mengendalikan| R1
-    E2 ===>|Mengendalikan| R2
-    E3 ===>|Mengendalikan| R3
+    E1 ===>|"Mengendalikan"| R1
+    E2 ===>|"Mengendalikan"| R2
+    E3 ===>|"Mengendalikan"| R3
 ```
 
 ---
