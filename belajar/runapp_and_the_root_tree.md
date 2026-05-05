@@ -26,21 +26,21 @@ graph TD
     classDef bad fill:#ffcccc,stroke:#red,stroke-width:2px;
     classDef good fill:#ccffcc,stroke:#green,stroke-width:2px;
 
-    OS[Layar Fisik HP & OS] -->|runApp()| RV[RenderView / Akar Utama]:::root
+    OS["Layar Fisik HP & OS"] -->|"runApp()"| RV["RenderView / Akar Utama"]:::root
     
-    RV -->|Tight Constraint: Paksakan ukuran = Ukuran Layar| WIDGET_PERTAMA
+    RV -->|"Tight Constraint: Paksakan ukuran = Ukuran Layar"| WIDGET_PERTAMA
     
     subgraph Skenario A: runApp langsung panggil Text
-    WIDGET_PERTAMA_A[Text 'Halo']:::bad
-    WIDGET_PERTAMA_A -.->|Hasil:| HASIL_A[Teks tertarik ke pojok kiri atas, layar hitam, tanpa font styling]
+    WIDGET_PERTAMA_A["Text 'Halo'"]:::bad
+    WIDGET_PERTAMA_A -.->|"Hasil:"| HASIL_A["Teks tertarik ke pojok kiri atas, layar hitam, tanpa font styling"]
     end
 
     subgraph Skenario B: runApp panggil MaterialApp
-    WIDGET_PERTAMA_B[MyApp -> MaterialApp]:::good
-    WIDGET_PERTAMA_B -->|Menyebarkan Aturan| INFRA[MediaQuery, Theme, Navigator]
-    INFRA -->|Menyediakan Canvas| SCAF[Scaffold / Layar Putih]
-    SCAF -->|Memberi Ruang Aman| TEXT_B[Text 'Halo']
-    TEXT_B -.->|Hasil:| HASIL_B[Teks rapi di tengah layar putih, aman dari poni kamera]
+    WIDGET_PERTAMA_B["MyApp -> MaterialApp"]:::good
+    WIDGET_PERTAMA_B -->|"Menyebarkan Aturan"| INFRA["MediaQuery, Theme, Navigator"]
+    INFRA -->|"Menyediakan Canvas"| SCAF["Scaffold / Layar Putih"]
+    SCAF -->|"Memberi Ruang Aman"| TEXT_B["Text 'Halo'"]
+    TEXT_B -.->|"Hasil:"| HASIL_B["Teks rapi di tengah layar putih, aman dari poni kamera"]
     end
 
     RV -.-> WIDGET_PERTAMA_A
