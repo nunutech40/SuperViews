@@ -243,3 +243,59 @@ graph TD
     W1 -.->|"Dibaca oleh"| E1
     E1 ===>|"Mengendalikan"| R1
 ```
+
+---
+
+## 5. Misteri Rebuild & Hukum Mutlak `Widget.canUpdate`
+
+Kenapa Flutter bisa sangat cepat meskipun tiap kali `setState` dipanggil, ribuan *Widget* (Kertas Biru) dibuang ke tong sampah? Jawabannya ada pada fungsi sakti bernama **`Widget.canUpdate(oldWidget, newWidget)`**.
+
+Fungsi ini adalah gerbang pengadilan logika yang menentukan apakah Mandor (`Element`) boleh **BERTAHAN**, atau harus **DIHUKUM MATI**.
+
+Hukumnya sangat sederhana. Mandor diizinkan bertahan hidup (sekadar di-*update*) **HANYA JIKA**:
+1. `runtimeType` (Jenis Kelas Widget) **SAMA PERSIS**.
+2. `key` (ID Unik) **SAMA PERSIS** (atau sama-sama `null`).
+
+Mari kita bedah 3 Skenario Kiamat saat `setState` dijalankan:
+
+### Skenario A: Rebuild Aman (Hanya Update Data)
+*Kasus: Teks "Skor: 0" berubah jadi "Skor: 1".*
+
+1. **Kertas Lama:** `Text('Skor: 0')`
+2. **Kertas Baru:** `Text('Skor: 1')`
+3. **Pengadilan `canUpdate`:** Tipe sama (`Text` == `Text`), Key sama (`null` == `null`). **Hasil: TRUE.**
+4. **Apa yang Terjadi?** Mandor Kuning **TIDAK DIBUNUH**. Dia cuma ngambil Kertas Biru yang baru, lalu nyuruh Bangunan Hijau (`RenderParagraph`) untuk ngerubah cat '*Glyphs*' dari '0' jadi '1'. **(Operasi Sangat Cepat & Murah)**
+
+### Skenario B: Ganti Tipe Widget (Pembunuhan Mutlak)
+*Kasus: Menampilkan `CircularProgressIndicator` lalu tiba-tiba di-*replace* jadi `Text` saat selesai loading.*
+
+1. **Kertas Lama:** `CircularProgressIndicator()`
+2. **Kertas Baru:** `Text('Selesai')`
+3. **Pengadilan `canUpdate`:** Tipe beda (`CircularProgressIndicator` != `Text`). **Hasil: FALSE.**
+4. **Apa yang Terjadi?** Mandor Kuning lama **DIBUNUH** (*Unmounted*). Bangunan Hijau lama **DIHANCURKAN** dari GPU. Mesin Flutter terpaksa harus merekrut Mandor baru dan ngebangun Bangunan Hijau baru dari nol. **(Operasi Mahal & Berat)**
+
+### Skenario C: Peran Unique ID (`Key`) Saat Mengacak Posisi
+*Kasus: Bos punya 2 Kotak (Merah dan Biru) di dalam `Row`, lalu Bos pencet tombol "Tukar Posisi".*
+
+Jika Bos **TIDAK PAKAI KEY (Polosan)**:
+1. Flutter melihat susunan ke-1: Kertas Lama `Kotak Merah`, Kertas Baru `Kotak Biru`. Tipe sama (`ColoredBox` == `ColoredBox`). **Hasil: TRUE.**
+2. Mesin menyuruh Mandor ke-1 merubah cat merah jadi biru. (Ini aneh secara fisika, padahal kotaknya niatnya cuma digeser, bukan dicat ulang).
+
+Jika Bos **PAKAI KEY (`ValueKey('Merah')` & `ValueKey('Biru')`)**:
+1. Flutter melihat susunan ke-1: Kertas Lama `Key('Merah')`, Kertas Baru `Key('Biru')`.
+2. **Pengadilan `canUpdate`:** Key Beda! **Hasil: FALSE.**
+3. **Apa yang Terjadi?** Apakah Mandor dibunuh? **TIDAK!** Flutter itu jenius. Pas dia lihat Key-nya beda, dia bakal nyari di sekitar, *"Eh, Key Merah pindah ke mana ya?"* Pas ketemu kalau pindah ke kanan, Flutter tinggal **MENCABUT** Mandor Merah beserta Bangunan Hijaunya secara utuh, lalu **MENGGESER** posisi mereka di RAM tanpa menghancurkan fisik bangunannya. 
+4. Inilah alasan kenapa *Key* itu **SANGAT VITAL** kalau Bos berhadapan sama *List* berisikan *StatefulWidget* yang bisa di-*sort*, diacak, atau dihapus posisinya!
+
+### Visualisasi Hukum `canUpdate`
+```mermaid
+graph TD
+    classDef rule fill:#ffebee,stroke:#c62828,stroke-width:2px;
+    classDef action fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+
+    S1["Dipicu oleh setState()"] --> C["Widget.canUpdate<br>(oldWidget, newWidget)"]:::rule
+    C -->|"Type & Key SAMA"| A1["UPDATE SAJA<br>(Mandor & Bangunan Bertahan)"]:::action
+    C -->|"Type atau Key BEDA"| A2["BUNUH ATAU GESER POSISI<br>(Element Unmounted / Reparented)"]:::rule
+```
+
+Dengan paham hukum `canUpdate` ini, *insting* Bos bakal otomatis terasah buat bikin struktur UI yang jarang memicu "Pembunuhan Mandor" (Skenario B), dan memaksimalkan "Geser/Update Mandor" (Skenario A & C).
