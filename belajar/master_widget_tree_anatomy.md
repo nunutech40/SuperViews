@@ -88,3 +88,53 @@ Saat Bos mengeklik tombol *Update*, Bos memanggil `setState()` di dalam Brankas 
 4. Kertas baru diserahkan ke Mandor (*Element*), dan layar berubah seketika.
 
 Itulah cara kerja alam semesta Flutter secara utuh dalam satu halaman penuh. Tidak ada sihir, hanya tumpukan hierarki yang dikelola dengan sangat rapi!
+
+---
+
+## 3. Taksonomi Widget: Fisika dan Arsitektur Ruang
+
+Jika kita membedah isi dari *Widget Tree* berdasarkan fungsi fisikanya, kita bisa membaginya ke dalam 3 kasta utama. Ini adalah *Mental Model* yang sangat brilian untuk merancang UI tanpa kebingungan *error layout*.
+
+### A. Kasta Pengatur Ruang (Layout / Struktur)
+Ini adalah kerangka baja penopang dari sebuah bangunan. Mereka murni tidak terlihat di layar (tidak punya warna), tapi mereka menentukan ke mana arah anak-anaknya harus berbaris.
+*   **Contoh:** `Column` (Susunan Vertikal), `Row` (Horizontal), `Stack` (Tumpukan Z-Axis), `Wrap`.
+*   **Sifat Fisika:** Tidak punya batas statis, melainkan membagikan sisa ruang yang ada kepada anak-anaknya (`children`).
+
+### B. Kasta Gravitasi & Pengatur Batasan (Constraint)
+Ini adalah mandor ahli fisika. Mereka juga tidak menggambar apapun di layar, tapi mereka menyuntikkan gaya gravitasi, tarikan paksa, atau kurungan ukuran yang absolut kepada anaknya.
+*   **Contoh:** 
+    *   `Center` (Gravitasi absolut ke tengah).
+    *   `Align` (Gravitasi spesifik ke koordinat tertentu).
+    *   `Expanded` (Daya tarik paksa untuk memakan seluruh ruang kosong milik *Layout*).
+    *   `SizedBox` / `ConstrainedBox` (Sangkar besi pengunci ukuran absolut).
+    *   `Padding` (Gaya tolak/tolakan magnet dari tembok sekitar).
+*   **Sifat Fisika:** Umumnya hanya menampung satu anak (`child`) dan memanipulasi *BoxConstraints* milik anak tersebut.
+
+### C. Kasta Atom & Molekul (Batu Bata Visual)
+Ini adalah perabotan fisik, cat, dan semen nyata. Mereka adalah entitas yang benar-benar memancarkan cahaya/warna (*pixel*) ke lensa mata *user*.
+*   **Contoh Atom:** `Text` (Bentuk Huruf), `Icon` (Bentuk Vektor), `Image` (Raster Bitmap), `ColoredBox` (Kotak Cat).
+*   **Contoh Molekul (Gabungan Atom+Gravitasi):** `Container` (Sebenarnya `Container` bukanlah entitas murni, melainkan rakitan dari `Padding` + `Align` + `ColoredBox`), `ElevatedButton`.
+*   **Sifat Fisika:** Menjadi titik daun paling ujung (*Leaf Object*) di dalam *Tree* yang bertugas murni memegang kuas cat GPU.
+
+### Visualisasi Taksonomi Ruang
+Berikut adalah rontgen fisika dari kodingan sederhana: "Teks ditaruh di tengah ruang kosong".
+
+```mermaid
+graph TD
+    classDef layout fill:#bbdefb,stroke:#1976d2,stroke-width:2px;
+    classDef physics fill:#ffe0b2,stroke:#f57c00,stroke-width:2px;
+    classDef atom fill:#c8e6c9,stroke:#388e3c,stroke-width:2px;
+
+    L["Kasta Pengatur Ruang<br>Column (Tidak terlihat)"]:::layout
+    
+    P1["Kasta Gravitasi & Constraint<br>Expanded (Menarik paksa memakan sisa ruang)"]:::physics
+    P2["Kasta Gravitasi<br>Center (Menarik ke tengah)"]:::physics
+    
+    A["Kasta Atom<br>Text 'Halo' (Pixel Nyata)"]:::atom
+
+    L -->|"Membagi ruang vertikal"| P1
+    P1 -->|"Membatasi ruang kurungan maksimal"| P2
+    P2 -->|"Memberikan gaya tarik tengah"| A
+```
+
+Dengan *Mental Model* 3 Kasta ini, kalau layar Bos tiba-tiba *error overflow* (garis kuning hitam), Bos langsung tahu siapa tersangkanya: *"Oh, Kasta Atom gue terlalu gede, tapi Kasta Gravitasi gue (SizedBox) ngurung kekecilan!"*
