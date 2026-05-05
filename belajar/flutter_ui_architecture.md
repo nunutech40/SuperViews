@@ -9,6 +9,7 @@ Dokumen ini membedah teknologi di balik Flutter, dari level perangkat keras (GPU
 Di ujung paling bawah, Flutter berkomunikasi langsung dengan perangkat keras HP tanpa menggunakan komponen UI bawaan OS (OEM Widgets seperti `View` di Android atau `UIView` di iOS).
 
 *   **VSync (Vertical Sync):** Ini adalah "Detak Jantung" layar HP. Layar memancarkan sinyal VSync setiap 16 milidetik (untuk layar 60Hz) atau 8 milidetik (untuk 120Hz). Flutter "mendengarkan" detak jantung ini. Jika dalam 16ms Flutter gagal merakit UI, maka terjadilah **Jank (Lag / Frame Drop)**.
+    > 🔗 **Deep Dive Khusus:** Penasaran teknologi hardware apa yang menciptakan sinyal 16ms ini? Baca selengkapnya di [Deep Dive: VSync & Teknologi Hardware](vsync_and_display_hardware.md).
 *   **GPU (Graphics Processing Unit):** Otot utama yang bertugas mewarnai jutaan pixel di layar. Flutter melemparkan instruksi gambar matematika langsung ke GPU.
 *   **CPU (Central Processing Unit):** Otak yang mengeksekusi logika Dart (menghitung state, *if-else*, dan posisi UI).
 
