@@ -17,11 +17,28 @@ Di ujung paling bawah, Flutter berkomunikasi langsung dengan perangkat keras HP 
 
 ## 2. Flutter Engine (C++) - Mesin Pabrik
 
-Ini adalah mesin rahasia Flutter yang ditulis menggunakan bahasa C++ agar berjalan secepat kilat.
+Ini adalah mesin rahasia Flutter yang secara eksklusif ditulis menggunakan bahasa **C++**. 
 
-*   **Skia / Impeller (Graphics Engine):** Ini adalah pelukisnya. Ketika kita membuat kotak merah bulat, Dart tidak menggambar kotak. Dart mengirim perintah ke Skia/Impeller: *"Tolong gambar persegi dengan sudut 10px dan warna hex #FF0000"*. Skia/Impeller menerjemahkan instruksi ini menjadi perintah *OpenGL/Vulkan/Metal* yang dipahami GPU. (Impeller adalah mesin generasi baru buatan Google khusus untuk Flutter).
-*   **Dart VM (Virtual Machine):** Mesin yang menjalankan kode Dart. Di mode *Debug*, dia menggunakan JIT (*Just-In-Time*) agar *Hot Reload* bisa berjalan. Di mode *Release*, kode dikompilasi menjadi AOT (*Ahead-Of-Time* / *Machine Code* murni) sehingga sangat cepat.
-*   **Text Shaping (HarfBuzz) & Layout:** Engine yang bertugas menghitung jarak antar huruf (*kerning*), huruf Arab (RTL), dan emoji.
+**Kenapa harus C++?**
+1. **Kecepatan Mutlak & Tanpa Garbage Collector:** Bahasa tingkat tinggi (Dart, Java, Swift) memiliki "Tukang Sapu Otomatis" (Garbage Collector). Jika fitur ini tiba-tiba berjalan untuk membersihkan memori di tengah-tengah *rendering*, layar pasti akan *Lag* (*Janky*). C++ membebaskan *developer* mengelola memori secara manual, sehingga kecepatannya absolut untuk mengejar *deadline* rendering 16ms.
+2. **Bahasa Native Hardware:** C++ adalah "bahasa ibu" dari semua *Driver Hardware*. Untuk mengirim instruksi grafis secara instan ke *Driver GPU* (Vulkan/OpenGL di Android, Metal di iOS) tanpa *delay* perantara, C++ adalah jalan satu-satunya.
+
+**Komponen Utama Engine:**
+*   **Skia / Impeller (Graphics Engine):** Mesin pelukis yang menerjemahkan instruksi Dart menjadi bahasa tingkat rendah (*Draw Calls*) untuk GPU. (Impeller adalah mesin generasi baru buatan Google untuk menggantikan Skia).
+*   **Dart VM (Virtual Machine):** Mesin pengeksekusi logika. Mode *Debug* menggunakan JIT (*Just-In-Time*) agar *Hot Reload* menyala, mode *Release* menggunakan AOT (*Ahead-Of-Time* / *Machine Code* Murni) agar aplikasi berjalan secepat kilat.
+*   **Text Shaping (HarfBuzz) & Layout:** Engine matematika yang menghitung jarak spasi huruf (*kerning*), tata letak huruf Arab (RTL), dan emoji.
+
+**Cara Kerja Fisik: Bagaimana Engine Ngobrol dengan CPU & GPU?**
+Perlu diingat: **Engine BUKANLAH perangkat keras (hardware)**. Engine adalah murni perangkat lunak (Kumpulan Kode C++). Karena ia adalah *software*, Engine "hidup dan berjalan" dengan cara menggunakan tenaga prosesor CPU.
+
+Alur aslinya adalah sebagai berikut:
+1. **CPU Menjalankan Engine:** CPU membaca baris-baris kode C++ dari *Impeller/DartVM*.
+2. **Engine Menerjemahkan (Menggunakan Tenaga CPU):** Dengan kekuatan CPU, *Engine* menghitung kodingan UI Dart kita dan menerjemahkannya menjadi instruksi matematika grafis (Poligon, *Vertices*, Koordinat layar).
+3. **Surat Perintah (Draw Calls):** Setelah perhitungannya selesai, CPU (yang sedang menjalankan kode Engine) memaketkan hasilnya menjadi "Surat Perintah Kerja" tingkat rendah yang disebut *Draw Calls*.
+4. **Kirim ke GPU:** CPU melemparkan tumpukan dokumen *Draw Calls* ini ke dalam memori GPU.
+5. **GPU Eksekusi Buta:** GPU sama sekali tidak mengerti Dart, OS, atau UI. GPU murni hanyalah ribuan "kuli" *cores* yang bekerja secara paralel. Ia membaca surat dari CPU tadi, lalu mengeksekusinya dengan cara menembakkan aliran listrik (0101) untuk mewarnai jutaan LED pixel di kaca layar kaca secara instan.
+
+> **Kesimpulan Hierarki:** CPU (Sang Mandor) membekali dirinya dengan "Buku Translator" (Engine C++). Dengan buku tersebut, CPU mampu merakit *Draw Calls* untuk memerintah GPU (Pasukan Kuli) agar mengecat jutaan pixel di layar.
 
 ### Flowchart Interaksi Hardware & Mesin Flutter
 
