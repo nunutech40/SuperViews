@@ -63,3 +63,45 @@ Jika kodingan Dart kita terlalu rumit (misal melakukan *parsing JSON* raksasa di
 Layar tidak mau menunggu. Ia akan terpaksa **menampilkan gambar lama yang basi** sekali lagi. Lompatan inilah yang dilihat mata pengguna sebagai *Lag/Jank/Patah-patah*.
 
 > **Kesimpulan:** Arsitektur UI tidak lebih dari sebuah pabrik pembuat *Flipbook* (buku gambar animasi) yang dipaksa bekerja di bawah ancaman cambukan VSync setiap 16 milidetik.
+
+---
+
+## 7. Sequence Diagram VSync (Listrik ke UI)
+
+Berikut adalah diagram sekuensial yang merangkum seluruh perjalanan sinyal dari level elektron (listrik murni) hingga dieksekusi oleh kodingan Dart.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant L as Baterai (Listrik)
+    participant K as Kristal Kuarsa
+    participant DC as Display Controller
+    participant C as CPU (Hardware)
+    participant OS as OS (Choreographer)
+    participant FE as Flutter Engine (C++)
+    participant UI as Kodingan Dart UI
+
+    Note over L, DC: LEVEL HARDWARE MURNI (Listrik & Fisika)
+    L->>K: Mengalirkan listrik murni
+    K->>DC: Bergetar konstan (Jutaan Hz)
+    
+    Note over DC, C: SIKLUS DIMULAI (Setiap 16.67ms)
+    DC->>DC: Menghitung getaran kristal sampai 16.67ms
+    DC->>C: ⚡ Tembak IRQ (Hardware Interrupt: VSync)
+    
+    Note over C, OS: LEVEL SISTEM OPERASI (OS)
+    C->>C: Menghentikan tugas lain (Context Switch)
+    C->>OS: Bangunkan Layanan Display OS
+    
+    Note over OS, UI: LEVEL FRAMEWORK & APLIKASI
+    OS->>FE: 🔔 Bunyikan Lonceng VSync (Event Broadcast)
+    FE->>UI: Panggil `window.onBeginFrame()`
+    
+    Note right of UI: Deadline 16ms dimulai!
+    UI->>UI: Eksekusi `build(BuildContext)` (Hitung State, Layout)
+    UI-->>FE: Kembalikan instruksi lukisan (RenderObject)
+    
+    Note over FE, DC: PENYELESAIAN FRAME
+    FE-->>DC: Kirim pixel ke GPU/Display (Via Impeller)
+    DC-->>L: Gambar tampil di layar. Menunggu siklus 16ms berikutnya...
+```
