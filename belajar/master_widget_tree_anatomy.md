@@ -270,24 +270,24 @@ graph TD
     classDef green fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
 
     %% Proses canUpdate
-    W_OLD["Kertas Lama:<br>Text('Skor: 0')"]:::blue
-    W_NEW["Kertas Baru:<br>Text('Skor: 1')"]:::blue
+    W_OLD["Widget Object Lama:<br>Text('0') di RAM"]:::blue
+    W_NEW["Widget Object Baru:<br>Text('1') di RAM"]:::blue
     
     W_OLD -.-> C
     W_NEW -.-> C
     
-    C{"Pengadilan canUpdate<br>(Tipe: Text == Text)<br>(Key: null == null)"}:::rule
-    C -->|"Hasil: TRUE"| E["Mandor (StatelessElement)<br>BERTAHAN HIDUP"]:::yellow
+    C{"Eksekusi CPU canUpdate<br>(Tipe: Text == Text)<br>(Key: null == null)"}:::rule
+    C -->|"Hasil: TRUE"| E["Element Node (StatelessElement)<br>BERTAHAN DI RAM"]:::yellow
     
-    E -->|"Tugas Mandor"| T1["1. Buang Kertas Lama"]:::action
-    E -->|"Tugas Mandor"| T2["2. Pegang Kertas Baru"]:::action
-    E -->|"Tugas Mandor"| T3["3. Perintahkan Bangunan Update"]:::action
+    E -->|"Update Pointer"| T1["1. Hapus pointer Object Lama (di-GC)"]:::action
+    E -->|"Update Pointer"| T2["2. Arahkan pointer ke Object Baru"]:::action
+    E -->|"Update Pointer"| T3["3. Trigger update() ke RenderObject"]:::action
     
-    T3 --> R["Bangunan (RenderParagraph)<br>BERTAHAN HIDUP<br>Update cat dari '0' jadi '1'"]:::green
+    T3 --> R["RenderObject (RenderParagraph)<br>BERTAHAN DI RAM<br>Eksekusi FFI C++ -> GPU<br>Ubah arus listrik LED ke bentuk angka '1'"]:::green
 ```
 
-**Penjelasan Alur `Text`:**
-Karena tipe dan key-nya sama, Mandor Kuning (`StatelessElement`) **TIDAK DIBUNUH**. Dia cuma ngambil Kertas Biru yang baru, lalu nyuruh Bangunan Hijau (`RenderParagraph`) untuk ngerubah cat '*Glyphs*' dari '0' jadi '1'. **(Operasi Sangat Cepat & Murah)**
+**Penjelasan Realita Fisik (Tanpa Analogi):**
+Karena evaluasi *Pointer* tipe dan *key*-nya sama, **`StatelessElement` (Node Pointer di RAM) TIDAK DIHANCURKAN**. CPU hanya mencabut *pointer* dari *Widget Object* lama (sehingga jadi sampah memori yang disapu GC), lalu menancapkan *pointer*-nya ke *Widget Object* baru. Terakhir, Element menyuruh **`RenderParagraph`** untuk mengkalkulasi ulang *draw call* via FFI C++ dan mengirim *Command Buffer* ke GPU. **(Ini sangat cepat karena tidak mengalokasikan ulang RAM raksasa).**
 
 ### Skenario B: Ganti Tipe Widget (Pembunuhan Mutlak)
 *Kasus: Menampilkan `CircularProgressIndicator` lalu tiba-tiba di-*replace* jadi `Text` saat selesai loading.*
