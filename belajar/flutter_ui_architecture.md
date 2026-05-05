@@ -53,6 +53,13 @@ graph TD
     Impeller -- "5. Instruksi Pixel" --> GPU
 ```
 
+**Penjelasan Alur Interaksi (Siklus 16 Milidetik):**
+1. **VSync Interrupt CPU:** Layar (Hardware) mengirimkan sengatan listrik (*Interrupt*) ke CPU untuk meminta gambar baru.
+2. **CPU Mengeksekusi DartVM:** CPU segera melakukan *Context Switch* dan menjalankan mesin *DartVM* tempat aplikasi kita berada.
+3. **Panggil Fungsi `build()`:** *DartVM* mengeksekusi kodingan UI (Widget/State) milik kita untuk menghitung ulang tata letak dan posisi tombol.
+4. **Kirim RenderObject:** Setelah perhitungan selesai, UI kita mengembalikan instruksi *RenderObject* kepada mesin *Impeller* (C++).
+5. **Instruksi Pixel:** *Impeller* menerjemahkan instruksi tersebut menjadi koordinat *pixel* biner (0101) murni dan menembakkannya ke GPU untuk diwarnai di layar kaca.
+
 ---
 
 ## 3. Flutter Framework (Dart) - Arsitek UI
