@@ -68,7 +68,16 @@ Layar tidak mau menunggu. Ia akan terpaksa **menampilkan gambar lama yang basi**
 
 ## 7. Sequence Diagram VSync (Listrik ke UI)
 
-Berikut adalah diagram sekuensial yang merangkum seluruh perjalanan sinyal dari level elektron (listrik murni) hingga dieksekusi oleh kodingan Dart.
+Biar tidak salah paham, alurnya **BUKAN** dimulai dari kaca layar, melainkan dari baterai di dalam mesin. Berikut adalah kronologi fisiknya:
+
+1. **Baterai ➔ Kristal Kuarsa:** Listrik dari baterai mengalir ke sebuah batu kecil di *motherboard* HP bernama Kristal Kuarsa, membuat batu itu bergetar secara konstan.
+2. **Kristal ➔ Display Controller:** Getaran ini dibaca oleh *Display Controller*. Ini **BUKAN** kaca layarnya! Ini adalah **Chip Hardware Khusus** di dalam mesin HP yang tugasnya mengatur *timing* dan memori grafis.
+3. **Display Controller ➔ CPU:** Nah, si Chip *Display Controller* inilah yang memegang *stopwatch*. Dia menghitung getaran kristal. Pas hitungannya menyentuh **16.67ms**, Chip ini menembakkan sinyal setruman (VSync) ke CPU (Otak Utama HP).
+4. **CPU ➔ OS:** CPU yang sedang sibuk mengerjakan hal lain kaget kesetrum. Dia menghentikan sejenak pekerjaannya (*Context Switch*) dan membangunkan Sistem Operasi (Android/iOS).
+5. **OS ➔ Flutter:** Sistem Operasi membunyikan lonceng, memanggil aplikasi Flutter untuk segera merakit UI.
+6. **Flutter ➔ GPU ➔ KACA LAYAR (LCD/OLED):** Setelah kodingan Dart merakit UI dan diwarnai oleh GPU, hasil akhirnya barulah dilempar ke ujung jalan: **Kaca Layar (LCD/OLED)** untuk dipajang ke mata *user*.
+
+Berikut adalah visualisasi *Sequence Diagram*-nya:
 
 ```mermaid
 sequenceDiagram
