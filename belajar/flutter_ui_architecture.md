@@ -46,11 +46,11 @@ graph TD
     end
 
     %% Interaksi
-    VSync -- "Aba-aba Rebuild" --> UI
-    UI -- "Dieksekusi oleh" --> CPU
-    CPU -- "Berjalan di atas" --> DartVM
-    DartVM -- "Kirim Data Gambar" --> Impeller
-    Impeller -- "Kirim Pixel" --> GPU
+    VSync -- "1. Interrupt/Bangunkan" --> CPU
+    CPU -- "2. Eksekusi lewat" --> DartVM
+    DartVM -- "3. Panggil fungsi build()" --> UI
+    UI -- "4. Kirim hasil RenderObject" --> Impeller
+    Impeller -- "5. Instruksi Pixel" --> GPU
 ```
 
 ---
