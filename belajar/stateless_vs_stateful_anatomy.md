@@ -76,3 +76,49 @@ graph TD
 
 **Kesimpulan:**
 `StatefulWidget` itu sendiri sebenernya bodoh dan abadi (Immutable) persis kayak `Stateless`. Yang bikin dia kelihatan pintar dan bisa berubah wujud adalah karena dia punya **Mandor Kuning (StatefulElement) yang menjaga gawang memori bernama State**.
+
+---
+
+## 4. Perbandingan Siklus Hidup (Lifecycle)
+
+Karena `StatelessWidget` itu "miskin" (tidak punya Brankas Memori), siklus hidupnya sangat pendek dan membosankan. Sebaliknya, `StatefulWidget` punya siklus hidup yang sangat panjang dan dramatis karena dia harus mengurus Brankas-nya.
+
+### A. Lifecycle `StatelessWidget` (Pendek & Basi)
+Hanya ada 1 tahap penting: Lahir -> Gambar -> Hancur.
+1. `build(context)`: Menyatukan Blueprint untuk dilempar ke Mandor. (Selesai).
+*Catatan: Tidak ada memori yang dipertahankan. Tiap ada perubahan di atasnya, dia murni hancur dan lahir kembali dari nol.*
+
+### B. Lifecycle `StatefulWidget` (Panjang & Kompleks)
+Karena melibatkan Brankas (`State`), ada banyak titik intervensi (seperti operasi jantung) yang bisa Bos manfaatkan.
+
+```mermaid
+graph TD
+    classDef init fill:#c8e6c9,stroke:#388e3c,stroke-width:2px;
+    classDef build fill:#bbdefb,stroke:#1976d2,stroke-width:2px;
+    classDef update fill:#ffe0b2,stroke:#f57c00,stroke-width:2px;
+    classDef kill fill:#ffcdd2,stroke:#d32f2f,stroke-width:2px;
+
+    S["1. createState()"] --> I["2. initState()"]:::init
+    I --> D["3. didChangeDependencies()"]:::init
+    D --> B["4. build()"]:::build
+    
+    %% Siklus Rebuild
+    B -.->|"User Interaksi"| SS["setState()"]:::update
+    SS -.->|"Tandai Kotor (Dirty)"| B
+    
+    %% Siklus Update Parent
+    B -.->|"Parent Rebuild (Blueprint Baru)"| DUW["didUpdateWidget()"]:::update
+    DUW -.->|"Cocokkan Data Baru"| B
+    
+    %% Siklus Kematian
+    B -.->|"Dibuang dari Layar"| DE["deactivate()"]:::kill
+    DE --> DIS["5. dispose()"]:::kill
+```
+
+**Penjelasan Tahapan Kritis di `StatefulWidget`:**
+1. **`initState()`**: Dijalankan **HANYA 1 KALI** seumur hidup Brankas. Tempat paling wajib untuk pesen *Controller* (Animasi/Scroll), *fetch API* pertama kali, atau *subscribe WebSocket*.
+2. **`didChangeDependencies()`**: Dijalankan setelah `initState`, dan bakal kepanggil lagi kalau Bos bergantung pada `InheritedWidget` (contoh: `Provider`, `Theme`, `MediaQuery`) lalu data global itu berubah.
+3. **`build()`**: Jantung utama. Dijalankan **berkali-kali**. **HARAM HUKUMNYA** menaruh logika berat seperti *fetching API* atau hitungan *Looping* raksasa di sini, karena bakal menahan laju VSync dan bikin HP nge-*lag* (Jank).
+4. **`didUpdateWidget(oldWidget)`**: Dipanggil otomatis kalau Kertas Biru (*Widget*) dicetak ulang oleh *Parent* di atasnya (Skenario `canUpdate == TRUE`). Brankas bisa ngelihat perbedaan antara `oldWidget` dan `widget` baru di sini, buat nentuin *"Oh, ID barangnya ganti, gue harus reset animasi nih"*.
+5. **`setState()`**: Tombol panik untuk menyuruh mesin manggil `build()` ulang. **HANYA ADA DI DALAM BRANKAS (`State`)**. Kertas Biru (`StatefulWidget`) nggak punya fitur ini!
+6. **`dispose()`**: Pesan wasiat terakhir sebelum Brankas dihancurkan permanen dari RAM. Sangat krusial buat menutup *Stream*, *ScrollController*, *TextEditingController* atau *Timer*. Kalau lupa ditaruh di sini = **MEMORY LEAK!** (HP makin lama makin panas karena RAM penuh sampah).
