@@ -261,10 +261,33 @@ Mari kita bedah 3 Skenario Kiamat saat `setState` dijalankan:
 ### Skenario A: Rebuild Aman (Hanya Update Data)
 *Kasus: Teks "Skor: 0" berubah jadi "Skor: 1".*
 
-1. **Kertas Lama:** `Text('Skor: 0')`
-2. **Kertas Baru:** `Text('Skor: 1')`
-3. **Pengadilan `canUpdate`:** Tipe sama (`Text` == `Text`), Key sama (`null` == `null`). **Hasil: TRUE.**
-4. **Apa yang Terjadi?** Mandor Kuning **TIDAK DIBUNUH**. Dia cuma ngambil Kertas Biru yang baru, lalu nyuruh Bangunan Hijau (`RenderParagraph`) untuk ngerubah cat '*Glyphs*' dari '0' jadi '1'. **(Operasi Sangat Cepat & Murah)**
+```mermaid
+graph TD
+    classDef rule fill:#ffebee,stroke:#c62828,stroke-width:2px;
+    classDef action fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef blue fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef yellow fill:#fff9c4,stroke:#f57f17,stroke-width:2px;
+    classDef green fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
+
+    %% Proses canUpdate
+    W_OLD["Kertas Lama:<br>Text('Skor: 0')"]:::blue
+    W_NEW["Kertas Baru:<br>Text('Skor: 1')"]:::blue
+    
+    W_OLD -.-> C
+    W_NEW -.-> C
+    
+    C{"Pengadilan canUpdate<br>(Tipe: Text == Text)<br>(Key: null == null)"}:::rule
+    C -->|"Hasil: TRUE"| E["Mandor (StatelessElement)<br>BERTAHAN HIDUP"]:::yellow
+    
+    E -->|"Tugas Mandor"| T1["1. Buang Kertas Lama"]:::action
+    E -->|"Tugas Mandor"| T2["2. Pegang Kertas Baru"]:::action
+    E -->|"Tugas Mandor"| T3["3. Perintahkan Bangunan Update"]:::action
+    
+    T3 --> R["Bangunan (RenderParagraph)<br>BERTAHAN HIDUP<br>Update cat dari '0' jadi '1'"]:::green
+```
+
+**Penjelasan Alur `Text`:**
+Karena tipe dan key-nya sama, Mandor Kuning (`StatelessElement`) **TIDAK DIBUNUH**. Dia cuma ngambil Kertas Biru yang baru, lalu nyuruh Bangunan Hijau (`RenderParagraph`) untuk ngerubah cat '*Glyphs*' dari '0' jadi '1'. **(Operasi Sangat Cepat & Murah)**
 
 ### Skenario B: Ganti Tipe Widget (Pembunuhan Mutlak)
 *Kasus: Menampilkan `CircularProgressIndicator` lalu tiba-tiba di-*replace* jadi `Text` saat selesai loading.*
