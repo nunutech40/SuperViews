@@ -158,27 +158,27 @@ graph TD
 
     %% WIDGET TREE
     subgraph WIDGET_TREE [Kertas Blueprint]
-        W1["Column"]:::widget
+        W1["Column<br>[Tipe: Immutable]<br>[Status: DIBUANG & REBUILD]"]:::widget
         W1 --> W2["Widget Anak A"]:::widget
         W1 --> W3["Widget Anak B"]:::widget
     end
 
     %% ELEMENT TREE
     subgraph ELEMENT_TREE [Mandor / Memory]
-        E1["MultiChildRenderObjectElement<br>(Mandor Banyak Anak)"]:::element
+        E1["MultiChildRenderObjectElement<br>[ID: 0x1A2B]<br>[Tipe: Mutable]<br>[Status: BERTAHAN (Update Ref)]"]:::element
         E1 --> E2["Element Anak A"]:::element
         E1 --> E3["Element Anak B"]:::element
     end
 
     %% RENDER OBJECT TREE
     subgraph RENDEROBJECT_TREE [Bangunan Fisik]
-        R1["RenderFlex<br>(Tugasnya murni ngitung Flexbox X/Y)"]:::render
+        R1["RenderFlex<br>[Tipe: Mutable]<br>[Status: BERTAHAN (Update Flex/Ukuran)]"]:::render
         R1 --> R2["RenderBox A"]:::render
         R1 --> R3["RenderBox B"]:::render
     end
 
-    W1 -.->|"Dipegang oleh"| E1
-    E1 ===>|"Menyuruh"| R1
+    W1 -.->|"Dibaca oleh"| E1
+    E1 ===>|"Mengendalikan"| R1
 ```
 
 ### B. Anatomi Kasta Gravitasi & Constraint
@@ -194,24 +194,24 @@ graph TD
 
     %% WIDGET TREE
     subgraph WIDGET_TREE [Kertas Blueprint]
-        W1["Center<br>(Gravitasi)"]:::widget
+        W1["Center<br>[Tipe: Immutable]<br>[Status: DIBUANG & REBUILD]"]:::widget
         W1 --> W2["Widget Anak Tunggal"]:::widget
     end
 
     %% ELEMENT TREE
     subgraph ELEMENT_TREE [Mandor / Memory]
-        E1["SingleChildRenderObjectElement<br>(Mandor Anak Tunggal)"]:::element
+        E1["SingleChildRenderObjectElement<br>[ID: 0x9F8E]<br>[Tipe: Mutable]<br>[Status: BERTAHAN (Update Ref)]"]:::element
         E1 --> E2["Element Anak Tunggal"]:::element
     end
 
     %% RENDER OBJECT TREE
     subgraph RENDEROBJECT_TREE [Bangunan Fisik]
-        R1["RenderPositionedBox<br>(Menyuntikkan gaya tarik tengah ke kotak di bawahnya)"]:::render
+        R1["RenderPositionedBox<br>[Tipe: Mutable]<br>[Status: BERTAHAN (Update Constraints)]"]:::render
         R1 --> R2["RenderBox Anak Tunggal"]:::render
     end
 
-    W1 -.->|"Dipegang oleh"| E1
-    E1 ===>|"Menyuruh"| R1
+    W1 -.->|"Dibaca oleh"| E1
+    E1 ===>|"Mengendalikan"| R1
 ```
 
 ### C. Anatomi Kasta Atom & Molekul (Batu Bata Fisik)
@@ -227,19 +227,19 @@ graph TD
 
     %% WIDGET TREE
     subgraph WIDGET_TREE [Kertas Blueprint]
-        W1["ColoredBox<br>color: red"]:::widget
+        W1["ColoredBox (Merah)<br>[Tipe: Immutable]<br>[Status: DIBUANG & REBUILD]"]:::widget
     end
 
     %% ELEMENT TREE
     subgraph ELEMENT_TREE [Mandor / Memory]
-        E1["LeafRenderObjectElement<br>(Mandor Daun Terakhir / Mandul)"]:::element
+        E1["LeafRenderObjectElement<br>[ID: 0x5D4C]<br>[Tipe: Mutable]<br>[Status: BERTAHAN (Update Ref)]"]:::element
     end
 
     %% RENDER OBJECT TREE
     subgraph RENDEROBJECT_TREE [Bangunan Fisik]
-        R1["RenderColoredBox<br>(Tugas murni: Perintahkan Impeller<br>cetak warna RGB merah)"]:::render
+        R1["RenderColoredBox<br>[Tipe: Mutable]<br>[Status: BERTAHAN (Update Warna Cat)]"]:::render
     end
 
-    W1 -.->|"Dipegang oleh"| E1
-    E1 ===>|"Menyuruh"| R1
+    W1 -.->|"Dibaca oleh"| E1
+    E1 ===>|"Mengendalikan"| R1
 ```
