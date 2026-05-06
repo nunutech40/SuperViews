@@ -47,3 +47,53 @@ Kasus: `Text('0')` diubah jadi `Text('1')` lewat pemanggilan `setState()`.
 4. **Math Calculation (RenderObject):** Element menimpa (*update*) referensi string di dalam RAM milik `RenderParagraph` dari '0' menjadi '1'.
 5. **Draw Call Dispatch:** `RenderParagraph` memanggil FFI C++ (*HarfBuzz engine*) untuk mengkalkulasi ulang lekukan lengkungan *font* angka '1'.
 6. **GPU Execution:** C++ mengirim *Command Buffer* lewat *Bus* hardware ke GPU. GPU merubah voltase *Sub-Pixel* LED di koordinat tertentu untuk memadamkan lampu bentuk '0' dan menyalakan lampu bentuk '1'.
+
+---
+
+## 4. Flowchart Realita Arsitektur (Dari Dart ke LED Pixel)
+
+Ini adalah *Blueprint* kebenaran absolut tentang bagaimana kodemu dikompilasi dan menyeberang dari dunia *Software* ke *Hardware*. Tanpa halusinasi.
+
+```mermaid
+graph TD
+    classDef dart fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef ffi fill:#fff9c4,stroke:#f57f17,stroke-width:2px;
+    classDef cpp fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px;
+    classDef hardware fill:#ffebee,stroke:#c62828,stroke-width:2px;
+
+    %% Level 1: Dunia Dart (User Space)
+    DART["Dunia Dart (dart:ui)<br>canvas.drawRect() / view.render()"]:::dart
+
+    %% Level 2: Jembatan
+    FFI["Dart FFI (Jembatan Bahasa)<br>Native Engine Call"]:::ffi
+
+    %% Level 3: Mesin C++ (Impeller)
+    subgraph ENGINE [Mesin C++ Flutter (Impeller)]
+        DL["DisplayList Builder<br>(Rekaman Instruksi Agnostik)"]:::cpp
+        AIKS["Aiks Canvas<br>(High-Level Impeller API)"]:::cpp
+        HAL["Hardware Abstraction Layer (HAL)<br>Membuat Command Buffer & Render Pass"]:::cpp
+        
+        DL --> AIKS
+        AIKS --> HAL
+    end
+
+    %% Level 4: OS Graphics Driver
+    OS_API["OS Graphics Driver<br>Metal (iOS) / Vulkan (Android)"]:::cpp
+
+    %% Level 5: Hardware Asli
+    subgraph HW [Hardware Fisik]
+        PCI["Kabel Motherboard (PCIe Bus)"]:::hardware
+        GPU["GPU (Cip Grafis)<br>Eksekusi Vertex & Fragment Shaders"]:::hardware
+        LED["Layar HP (LED)<br>Arus listrik memanipulasi voltase pixel merah/hijau/biru"]:::hardware
+        
+        PCI --> GPU
+        GPU --> LED
+    end
+
+    DART ==>|"Memanggil API"| FFI
+    FFI ==>|"Melempar pointer"| DL
+    HAL ==>|"Menerjemahkan ke bahasa OS"| OS_API
+    OS_API ==>|"Kirim sinyal listrik"| PCI
+```
+
+*Flowchart* di atas membuktikan bahwa Dart itu murni hanya **Mandor Proyek** yang memberikan spesifikasi kerja, sedangkan yang benar-benar **Berkeringat Membangun Rumah** adalah mesin C++ (Impeller) dan GPU fisik di HP kalian.
